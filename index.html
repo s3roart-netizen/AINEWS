@@ -24,12 +24,20 @@
   /* Layout */
   main{max-width:1220px;margin:18px auto;padding:0 16px}
   #loading{padding:20px;color:#666}
-  /* Hero (ohne Bild) */
+  /* Media */
+  .media{position:relative;overflow:hidden;background:#f2f2f2}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .hero .media{height:200px}
+  .card .media{height:120px}
+  .article .media{height:260px;border-radius:8px;overflow:hidden;margin:8px 0 12px}
+  /* Hero (Text) */
   .hero{display:block;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);text-decoration:none;color:inherit;margin-bottom:16px;background:#111}
   .hero .inner{padding:18px;color:#fff}
   .hero h2{margin:6px 0 0;font-size:26px}
   .hero p{margin:8px 0 0;color:#f3f3f3}
-  .meta{font-size:12px;color:#bbb}
+  .meta{font-size:12px;color:#666}
+  .badge{font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 6px;border-radius:999px}
+  .beta{background:#ffe58a;color:#111}
   /* Grid (Text-Karten) */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
   .card{display:block;background:#fff;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 8px 24px rgba(0,0,0,.06)}
@@ -37,11 +45,24 @@
   .card h3{margin:4px 0 0;font-size:16px;line-height:1.25}
   .card p{margin:8px 0 0;color:#444;font-size:14px}
   /* Article page */
-  .article{max-width:860px;margin:18px auto;padding:0 16px}
+  .article{max-width:860px;margin:18px auto;padding:0 16px;position:relative}
   .article h1{font-size:24px;margin:8px 0}
-  .article .meta{margin:6px 0 12px;color:#666}
+  /* Meta-Zeile im Artikel: links Infos, rechts Button */
+  .article .meta-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 10px
+  }
+  .meta-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .meta-actions{margin-left:auto;position:relative;display:flex;align-items:center}
   .article .sources{margin-top:18px;padding:12px;background:#f7f7f7;border-radius:8px}
   .article .sources a{color:#e50914}
+  .article-body p{margin:12px 0;line-height:1.6}
+  /* >>> Keypoints bündig links (ohne Einzug) <<< */
+  .article-body ul{
+    margin:10px 0 0 0;      /* kein linker Außenabstand */
+    padding-left:0;         /* kein innerer Einzug */
+    list-style-position:inside; /* Bullet steht in der Content-Kante */
+  }
+  .article-body li{margin:6px 0;line-height:1.5}
   .back{display:inline-block;margin:12px 16px;color:#e50914;text-decoration:none;font-weight:700;cursor:pointer}
   footer{padding:18px;text-align:center;color:#666}
   /* Modal Personalisieren */
@@ -56,9 +77,33 @@
   .btn{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-weight:700}
   .btn.primary{background:#e50914;color:#fff;border-color:#e50914}
   .btn.ghost{background:transparent;border-color:transparent;color:#555}
-  .note{font-size:12px;color:#666;margin-top:6px}
-  /* Badge */
-  #modeBadge{position:fixed;right:10px;bottom:10px;padding:6px 10px;border-radius:999px;font-size:12px;background:#eee;color:#333}
+  .note{font-size:12px;color:#666}
+  .fade{animation:fade .25s ease-in}
+  @keyframes fade{from{opacity:.5}to{opacity:1}}
+
+  /* Text-Filter-Button */
+  .filter-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid #e6e6e6;
+    background:linear-gradient(180deg,#ffffff,#f6f6f6);
+    border-radius:12px;padding:8px 12px;font-weight:800;
+    cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06);
+    letter-spacing:.2px
+  }
+  .filter-btn .icon{font-size:14px}
+  .filter-btn .chev{display:inline-block;transition:transform .18s ease}
+  .filter-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  .filter-caption{font-size:12px;color:#666;margin-left:2px}
+  .filter-menu{
+    position:absolute;right:0;top:calc(100% + 8px);z-index:5;
+    background:#fff;border:1px solid #ececec;border-radius:12px;
+    box-shadow:0 18px 40px rgba(0,0,0,.12);min-width:220px;display:none;overflow:hidden
+  }
+  .filter-menu.open{display:block}
+  .filter-item{width:100%;text-align:left;border:0;background:#fff;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .filter-item:hover{background:#f9f9f9}
+  .filter-item .dot{width:10px;height:10px;border-radius:999px;background:#d0d0d0}
+  .filter-item.active .dot{background:var(--red)}
 </style>
 </head>
 <body>
@@ -74,7 +119,6 @@
 </main>
 
 <footer>© AI NEWS</footer>
-<div id="modeBadge" title="Anzeigemodus">—</div>
 
 <!-- Personalisieren Modal -->
 <div id="personalizeBackdrop" class="modal-backdrop" aria-hidden="true">
@@ -100,10 +144,10 @@
 </div>
 
 <script>
-/* ========= Einstellungen ========= */
-const CACHE_TTL_MS = 2 * 60 * 1000;
-const INITIAL_RENDER = 12;
-const LOAD_STEP = 12;
+/* ========= Flags ========= */
+const DEMO_ONLY = true;
+const MIN_ARTICLES = 10;
+const DEMO_IMAGE = (id,w,h)=>`https://picsum.photos/seed/${encodeURIComponent(id)}/${w}/${h}`;
 
 /* ========= Kategorien & Routing ========= */
 const ALL_CATS = [
@@ -122,6 +166,10 @@ const DEFAULT_VISIBLE = ALL_CATS.map(c=>c.slug||"");
 
 const LS_VISIBLE_KEY = "AIN_visible_slugs_v2";
 const LS_LAST_SLUG   = "AIN_last_slug_v2";
+const LS_TEXT_MODE   = "AIN_text_mode_v2"; // 'long' | 'medium' | 'points'
+let TEXT_MODE = localStorage.getItem(LS_TEXT_MODE) || 'long';
+if (TEXT_MODE === 'short') TEXT_MODE = 'medium';
+function saveTextMode(mode){ TEXT_MODE = mode; localStorage.setItem(LS_TEXT_MODE, mode); }
 
 function loadVisibleSlugs(){
   try{
@@ -172,258 +220,183 @@ function renderNav(activeSlug){
 }
 function setActiveTab(slug){ renderNav(slug); }
 
-/* ========= Backend/Client-Mode ========= */
-const STORE={byId:{},mode:"auto"};
-const badge=document.getElementById('modeBadge');
+/* ========= Store ========= */
+const STORE={byId:{},mode:"demo"};
 
-async function fetchWithTimeout(url,opts={},ms=10000){
-  return Promise.race([fetch(url,opts),new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
+/* ========= Demo-/BETA-Daten ========= */
+function demoNowMinus(min){ return new Date(Date.now()-min*60000).toISOString(); }
+function mkLongDemoBody(title, dek){
+  const base = (dek||"") + " " + (title||"");
+  const filler = [
+    "Analysten bewerten die aktuelle Entwicklung differenziert und verweisen auf vergleichbare Fälle der vergangenen Jahre.",
+    "Im Mittelpunkt steht die Frage, wie sich die Beschlüsse kurzfristig auf Wirtschaft, Gesellschaft und Verwaltung auswirken.",
+    "Behörden betonen, dass weitere Details in den kommenden Tagen folgen sollen, sobald Abstimmungen abgeschlossen sind.",
+    "Branchenvertreter erwarten eine Mischung aus Chancen und Herausforderungen, insbesondere bei Umsetzung und Finanzierung.",
+    "Aus Expertensicht sind Datenqualität, Transparenz und klare Zuständigkeiten entscheidend für den Erfolg.",
+    "Mehrere Stakeholder fordern, Betroffene frühzeitig einzubinden und Feedbackschleifen verbindlich zu machen.",
+    "Langfristig könnte die Maßnahme als Blaupause für ähnliche Projekte in anderen Regionen dienen."
+  ];
+  const sentences = (base + ". " + filler.join(". ") + ".").split(". ").map(s=>s.trim()).filter(Boolean);
+  const paras = [];
+  let buf=[], len=0;
+  for(const s of sentences){
+    const add = (buf.length? " " : "") + s + ".";
+    if(len + add.length > 2200 && paras.length>=5) break;
+    buf.push(s + ".");
+    len += add.length;
+    if(buf.length>=3){ paras.push(buf.join(" ")); buf=[]; }
+  }
+  if(buf.length) paras.push(buf.join(" "));
+  return paras.slice(0,7);
 }
-async function tryServerArticles(category){
-  try{
-    const r=await fetchWithTimeout(`/api/articles?category=${encodeURIComponent(category)}`,{},12000);
-    if(!r.ok) throw new Error("server "+r.status);
-    const js=await r.json();
-    if(js&&js.ok&&Array.isArray(js.articles)&&js.articles.length){
-      js.articles = js.articles.map(a=>({ ...a, firstPub: a.firstPub || a.pub, cat: a.cat || category }));
-      STORE.mode="server"; badge.textContent="Server-Modus"; 
-      return js.articles;
-    }
-    throw new Error("no articles");
-  }catch(e){ return null; }
+function mkDemo(cat,title,dek,mins,srcCount=1){
+  const id = "demo-"+Math.random().toString(36).slice(2,8);
+  const sources = Array.from({length:srcCount},(_,i)=>({
+    source:`Demo Newswire ${i+1}`,
+    title:`${title} – Quelle ${i+1}`,
+    url:`https://example.com/demo/${i+1}`
+  }));
+  return {
+    id, title, dek,
+    pub: demoNowMinus(mins),
+    firstPub: demoNowMinus(mins+5),
+    sources, sourceCount: sources.length,
+    cat,
+    image: DEMO_IMAGE(id, 1200, 630),
+    imageCard: DEMO_IMAGE(id+"c", 800, 420),
+    imageHero: DEMO_IMAGE(id+"h", 1200, 580),
+    bodyParas: mkLongDemoBody(title, dek)
+  };
 }
-async function tryServerArticle(id){
-  try{
-    const r=await fetchWithTimeout(`/api/article/${encodeURIComponent(id)}`,{},12000);
-    if(!r.ok) throw new Error("server "+r.status);
-    const js=await r.json();
-    if(js&&js.ok&&js.article){
-      js.article.firstPub = js.article.firstPub || js.article.pub;
-      STORE.mode="server"; badge.textContent="Server-Modus";
-      return js.article;
-    }
-    throw new Error("not found");
-  }catch(e){ return null; }
+function demoList(cat){
+  const base = {
+    Top: [
+      ["Demo: Regierung kündigt Digitalpakt an","Neuer Digitalpakt mit Fokus auf Infrastruktur, Bildung und Verwaltung.",5,3],
+      ["Demo: Energiepreise sinken deutlicher","Branchenverband erwartet stabile Entwicklung im Frühling.",16,2],
+      ["Demo: Bahn plant zusätzliche Fernzüge","Mehr Kapazität an Reisetagen, Fokus auf internationale Verbindungen.",27,1],
+      ["Demo: Bund startet Förderprogramm KI","Schwerpunkt Mittelstand und Forschung.",33,2],
+      ["Demo: Neue Cyberstrategie vorgestellt","Mehr Resilienz kritischer Infrastrukturen.",41,1],
+      ["Demo: Wohnbaupaket beschlossen","Ziel: schnellere Genehmigungen und Neubau.",55,2],
+      ["Demo: Zoll stellt Rekord bei Kontrollen auf","Mehr Aufdeckungen in Logistikzentren.",63,1],
+      ["Demo: Nationale Plattform für eID","Pilotierung startet in Großstädten.",71,2],
+      ["Demo: Gesundheitsreform im Kabinett","Digitale Akten verpflichtend bis 2027.",84,1],
+      ["Demo: Schulen erhalten Digitalcoaches","Ausbau von Medienkompetenz.",95,1],
+      ["Demo: Gründerfonds erweitert","Startups erhalten leichter Kapitalzugang.",108,2],
+      ["Demo: Breitband-Ausbau erreicht Meilenstein","95% Abdeckung im 5G-Netz.",117,2]
+    ],
+    Politik: [
+      ["Demo: Parlament debattiert Haushaltsentwurf","Opposition fordert Nachbesserungen, Ausschuss berät Investitionen.",9,2],
+      ["Demo: Außenminister reist zu Gipfel","Gespräche zu Sicherheits- und Handelsthemen angekündigt.",30,1],
+      ["Demo: Koalitionsausschuss vertagt","Komplexe Dossiers in Arbeitsgruppen.",44,1],
+      ["Demo: Länder fordern mehr Mittel","Föderale Programme sollen verstetigt werden.",52,2],
+      ["Demo: Untersuchungsausschuss befragt Zeugen","Schwerpunkte Datenschutz und Vergabe.",63,1],
+      ["Demo: Verfassungsgericht verhandelt Klage","Streit um Kompetenzen.",75,1],
+      ["Demo: Wahlrechtsreform passiert erste Hürde","Sperrklauseln in der Diskussion.",82,2],
+      ["Demo: Parlamentspräsident mahnt Einigkeit an","Appell für übergreifende Lösungen.",91,1],
+      ["Demo: Referendum über Verwaltungsreform","Beteiligung über digitale Kanäle.",103,1],
+      ["Demo: Fraktionen einigen sich auf Zeitplan","Plenarwochen fixiert.",115,1],
+      ["Demo: Vermittlungsausschuss angesetzt","Suche nach Kompromisslinien.",127,1],
+      ["Demo: EU-Rat tagt zu Binnenmarkt","Grenzübergreifende Dienste im Fokus.",141,2]
+    ],
+    Finanzen: [
+      ["Demo: Inflation fällt stärker als erwartet","Ökonomen sehen Spielraum für Zinssenkungen, Märkte reagieren positiv.",7,3],
+      ["Demo: Tech-Konzern übertrifft Prognosen","Umsatz im Cloud-Geschäft wächst, Aktie legt zu.",24,1],
+      ["Demo: DAX nähert sich Rekordhoch","Industriewerte im Plus.",31,2],
+      ["Demo: EZB signalisiert Kurs halten","Zinsgipfel abgewartet.",46,1],
+      ["Demo: IPO belebt Primärmarkt","Überzeichnung binnen Stunden.",55,2],
+      ["Demo: Startup sammelt Serie-B","Skalierung in EU geplant.",64,1],
+      ["Demo: Bankenverband warnt vor Risikomodellen","Stresstests ausgeweitet.",73,1],
+      ["Demo: Rohölpreis sinkt","Terminkurven drehen in Contango.",88,2],
+      ["Demo: Private Equity kauft Mittelständler","Digitalisierungsoffensive angekündigt.",97,1],
+      ["Demo: Anleihemärkte stabil","Spread-Kompression in Peripherie.",106,1],
+      ["Demo: Kryptomarkt volatil","Altcoins im Fokus.",118,1],
+      ["Demo: Devisenmarkt ruhig","Carry-Trades profitieren.",129,1]
+    ],
+    Sport: [
+      ["Demo: Nationalteam erreicht Finale","Spannendes Spiel mit spätem Tor – Trainer lobt Moral.",8,2],
+      ["Demo: Überraschung im Basketball","Underdog gewinnt auswärts – Serie bleibt offen.",31,1],
+      ["Demo: Marathon mit neuem Streckenrekord","Pace-Strategie geht auf.",45,1],
+      ["Demo: Tennis: Favoritin im Halbfinale","Aufschlagquote überzeugt.",57,1],
+      ["Demo: Radsport: Bergetappe entschieden","Attacke am letzten Anstieg.",66,1],
+      ["Demo: Handball: Keeper überragt","Siebenmeterquote stark.",74,1],
+      ["Demo: Eishockey: Shutout im Derby","Defensive steht sicher.",86,1],
+      ["Demo: Leichtathletik: U20 mit Medaillen","Nachwuchs überzeugt.",99,1],
+      ["Demo: Schwimmen: Nationalrekord über 200m","Negative-Split-Taktik.",112,1],
+      ["Demo: Volleyball: Comeback nach 0:2","Blockarbeit zahlt sich aus.",124,1],
+      ["Demo: Tischtennis: Sieg im Entscheidungsdurchgang","Platzierungsrunde offen.",135,1],
+      ["Demo: Wintersport: Trainingslager eröffnet","Materialtests im Fokus.",146,1]
+    ],
+    Fußball: [
+      ["Demo: Toptransfer kurz vor Abschluss","Verein bestätigt fortgeschrittene Gespräche, Medizincheck steht an.",6,2],
+      ["Demo: Trainer verlängert Vertrag","Langfristige Planung soll Talente fördern.",29,1],
+      ["Demo: UCL-Auslosung bringt Kracher","Faninteresse riesig.",41,1],
+      ["Demo: Abwehrchef kehrt ins Training zurück","Reha verläuft planmäßig.",52,1],
+      ["Demo: Talentsichtung in Akademie","Scouting erweitert Netzwerk.",63,1],
+      ["Demo: Ticketrekord beim Heimspiel","Vereinsinterne Bestmarke.",71,1],
+      ["Demo: VAR-Debatte flammt auf","Verbände kündigen Austausch an.",83,1],
+      ["Demo: Neuer Trikotsponsor vorgestellt","Mehr Engagement im Jugendbereich.",95,1],
+      ["Demo: Pokal-Halbfinale terminiert","Sicherheitskonzept abgestimmt.",106,1],
+      ["Demo: Spielplanverdichtung kritisiert","Belastungssteuerung im Gespräch.",118,1],
+      ["Demo: Jugendteam gewinnt Turnier","Durchmarsch ohne Gegentor.",129,1],
+      ["Demo: Stadionmodernisierung genehmigt","Kapazitätserhöhung geplant.",141,1]
+    ],
+    Kultur: [
+      ["Demo: Neues Museum eröffnet","Interaktive Formate – Besucherandrang zur Eröffnung.",11,1],
+      ["Demo: Festivalprogramm steht","Kuratorisches Thema: Wandel.",22,1],
+      ["Demo: Opernpremiere gefeiert","Standing Ovations zum Finale.",34,1],
+      ["Demo: Theater erhält Preis","Experimentelle Bühne geehrt.",47,1],
+      ["Demo: Literaturpreis vergeben","Debüt überzeugt Jury.",58,1],
+      ["Demo: Ausstellung verlängert","Besucherzahlen über Erwartungen.",69,1],
+      ["Demo: Restaurierung abgeschlossen","Ikonisches Werk kehrt zurück.",81,1],
+      ["Demo: Filmarchiv digitalisiert Bestände","Zugang für Forschung erleichtert.",95,1],
+      ["Demo: Philharmonie kündigt Tournee an","Neue Programme geplant.",107,1],
+      ["Demo: Designbiennale mit Rekord","Internationale Beteiligung wächst.",119,1],
+      ["Demo: Jazzfestival startet","Open-Air-Konzerte angekündigt.",131,1],
+      ["Demo: Stadt richtet Kulturfonds ein","Förderlinien angepasst.",142,1]
+    ],
+    Entertainment: [
+      ["Demo: Blockbuster startet stark","Premierenwochenende übertrifft Erwartungen – Kritiken gemischt.",14,2],
+      ["Demo: Serie verlängert um Staffel","Showrunner bestätigt Drehstart.",26,1],
+      ["Demo: Musikpreis-Nominierungen veröffentlicht","Vielfältiges Feld.",38,1],
+      ["Demo: Streamingdienst mit Rekordabo","Neues Abo-Modell zieht.",51,1],
+      ["Demo: Regisseur kündigt Sci-Fi an","Dreharbeiten im Herbst.",63,1],
+      ["Demo: Biopic feiert Premiere","Standing Ovations in Cannes.",75,1],
+      ["Demo: Spielverfilmung bestätigt","Drehbuchautor engagiert.",88,1],
+      ["Demo: Chartstürmer erreicht Platin","Kollaboration schlägt ein.",99,1],
+      ["Demo: Award-Show bekommt neuen Host","Publikum reagiert positiv.",110,1],
+      ["Demo: Animationsstudio mit Kurzfilmreihe","Künstlerische Experimente.",121,1],
+      ["Demo: Comedy-Special angekündigt","Tourdaten folgen.",132,1],
+      ["Demo: Festival setzt auf Nachhaltigkeit","Green-Stages geplant.",143,1]
+    ],
+    Wissenschaft: [
+      ["Demo: Durchbruch bei Batterien","Neue Kathodenstruktur erhöht Zyklenzahl – Pilotprojekt angekündigt.",10,2],
+      ["Demo: Teleskop entdeckt Exoplaneten","Daten bestätigen Transit.",22,1],
+      ["Demo: mRNA-Plattform erweitert","Anwendung in Onkologie.",34,1],
+      ["Demo: Quantenchip stabiler","Fehlerraten sinken signifikant.",46,1],
+      ["Demo: Klima-Studie zu Extremwetter","Attributionsforschung präziser.",58,1],
+      ["Demo: Fusionsforschung erzielt Rekord","Energieertrag verbessert.",70,1],
+      ["Demo: CRISPR-Variante präziser","Off-Target-Effekte reduziert.",81,1],
+      ["Demo: Meeresspiegel-Analyse aktualisiert","Satellitendaten verdichten Trends.",93,1],
+      ["Demo: Material entdeckt mit Supraleitung","Niedrige Druckbedingungen ausreichend.",104,1],
+      ["Demo: Robotik in der Pflege erprobt","Assistenzsysteme im Einsatz.",116,1],
+      ["Demo: Mathematikpreis vergeben","Neue Beweise für alte Vermutungen.",128,1],
+      ["Demo: Raumfahrt: Sonde erreicht Zielorbit","Erste Messreihen starten.",139,1]
+    ]
+  }[cat] || [];
+  return base.map(([t,d,m,s])=>mkDemo(cat,t,d,m,s));
 }
-
-/* ========= Client-RSS Feeds ========= */
-const FEEDS={
-  Top:[
-    "https://feeds.bbci.co.uk/news/rss.xml",
-    "https://feeds.reuters.com/reuters/topNews",
-    "https://rss.cnn.com/rss/edition.rss",
-    "https://www.cbsnews.com/latest/rss/main",
-    "https://www.nbcnews.com/rss",
-    "https://feeds.foxnews.com/foxnews/latest",
-    "https://rssfeeds.usatoday.com/usatoday-NewsTopStories",
-    "https://abcnews.go.com/abcnews/topstories"
-  ],
-  Politik:[
-    "https://feeds.bbci.co.uk/news/politics/rss.xml",
-    "https://rss.cnn.com/rss/edition_world.rss",
-    "https://www.theguardian.com/world/rss",
-    "https://feeds.skynews.com/feeds/rss/politics.xml",
-    "https://www.nbcnews.com/politics/politics-news/rss"
-  ],
-  Finanzen:[
-    "https://feeds.bbci.co.uk/news/business/rss.xml",
-    "https://www.reuters.com/business/finance/rss.xml",
-    "https://www.cnbc.com/id/10001147/device/rss/rss.html",
-    "https://www.foxbusiness.com/feeds/rss"
-  ],
-  /* SPORT – inkl. europäischer Quellen */
-  Sport:[
-    /* UK / International */
-    "https://feeds.bbci.co.uk/sport/rss.xml?edition=uk",
-    "https://rss.cnn.com/rss/edition_sport.rss",
-    "https://www.espn.com/espn/rss/news",
-    "https://www.espn.com/espn/rss/soccer/news",
-    "https://feeds.reuters.com/reuters/sportsNews",
-    "https://www.theguardian.com/sport/rss",
-    "https://www.skysports.com/rss/12040",
-    "https://www.cbssports.com/rss/headlines/",
-    "https://www.eurosport.com/rss.xml",
-    /* Deutschland */
-    "https://rss.kicker.de/news/fussball",
-    "https://www.spiegel.de/sport/index.rss",
-    "https://www.faz.net/rss/aktuell/sport/",
-    /* Spanien */
-    "https://e00-marca.uecdn.es/rss/futbol.xml",
-    "https://as.com/rss/futbol/",
-    "https://www.mundodeportivo.com/rss/futbol",
-    /* Italien */
-    "https://www.gazzetta.it/rss/Calcio.xml",
-    "https://www.corrieredellosport.it/rss/calcio.xml",
-    "https://www.tuttosport.com/rss/calcio.xml",
-    /* Frankreich */
-    "https://www.lequipe.fr/rss/actu_rss.xml",
-    "https://rmcsport.bfmtv.com/rss/",
-    /* Niederlande */
-    "https://feeds.nos.nl/nossport",
-    "https://www.vi.nl/rss"
-  ],
-  /* Fußball – reine Fußballfeeds, EU-lastig */
-  Fußball:[
-    /* UK */
-    "https://www.skysports.com/rss/12040",
-    "https://www.theguardian.com/football/rss",
-    "https://feeds.bbci.co.uk/sport/football/rss.xml",
-    "https://www.independent.co.uk/sport/football/rss",
-    /* DE */
-    "https://rss.kicker.de/news/fussball",
-    "https://www.spiegel.de/sport/index.rss",
-    /* ES */
-    "https://e00-marca.uecdn.es/rss/futbol.xml",
-    "https://as.com/rss/futbol/",
-    "https://www.mundodeportivo.com/rss/futbol",
-    /* IT */
-    "https://www.gazzetta.it/rss/Calcio.xml",
-    "https://www.corrieredellosport.it/rss/calcio.xml",
-    "https://www.tuttosport.com/rss/calcio.xml",
-    /* FR */
-    "https://www.lequipe.fr/rss/actu_rss.xml",
-    "https://rmcsport.bfmtv.com/rss/",
-    /* NL */
-    "https://www.vi.nl/rss"
-  ],
-  Kultur:[
-    "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
-    "https://www.theguardian.com/culture/rss"
-  ],
-  Entertainment:[
-    "https://rss.cnn.com/rss/edition_entertainment.rss",
-    "https://www.usatoday.com/entertainment/rss/"
-  ],
-  Wissenschaft:[
-    "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
-    "https://www.nature.com/subjects/rss.xml",
-    "https://www.sciencedaily.com/rss/top/science.xml"
-  ]
+const DEMO = {
+  Top: demoList("Top"),
+  Politik: demoList("Politik"),
+  Finanzen: demoList("Finanzen"),
+  Sport: demoList("Sport"),
+  Fußball: demoList("Fußball"),
+  Kultur: demoList("Kultur"),
+  Entertainment: demoList("Entertainment"),
+  Wissenschaft: demoList("Wissenschaft")
 };
 
-/* ========= RSS-Fetch & Parsing ========= */
-async function fetchFeed(url){
-  try{
-    const res=await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}&disableCache=true`,{},15000);
-    if(res.ok){ const j=await res.json(); if(j&&j.contents && j.contents.length>100) return j.contents; }
-  }catch(e){}
-  try{
-    const r2=await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`,{},15000);
-    const j2=await r2.json();
-    if(j2&&Array.isArray(j2.items)&&j2.items.length){
-      return j2.items.map(it=>(
-        `<item><title>${it.title||""}</title><link>${it.link||""}</link><description>${(it.description||"").replace(/<!\$begin:math:display$CDATA\\\\\[\|\\$end:math:display$\\]>/g,"")}</description><pubDate>${it.pubDate||""}</pubDate></item>`
-      )).join("");
-    }
-  }catch(e){}
-  return "";
-}
-function parseFeed(xml,fallbackHost=""){
-  const p=new DOMParser(); const doc=p.parseFromString(xml,"text/xml"); const items=[...doc.querySelectorAll("item")];
-  return items.map(it=>{
-    const title=it.querySelector("title")?.textContent?.trim()||"";
-    const link =it.querySelector("link")?.textContent?.trim()||"";
-    const descRaw=it.querySelector("description")?.textContent||"";
-    const desc=descRaw.replace(/<!\\[CDATA\\[|\\]\\]>/g,"").replace(/<[^>]+>/g," ").replace(/\s{2,}/g," ").trim();
-    const pub =it.querySelector("pubDate")?.textContent||"";
-    let host=""; try{ host=new URL(link).hostname.replace(/^www\\./,''); }catch{ host=fallbackHost; }
-    return {title,link,desc,pub,host};
-  }).filter(x=>x.title&&x.link);
-}
-
-/* ========= Clustering ========= */
-function cleanTitle(s){
-  s = (s||"")
-    .replace(/\s*[-–|]\s*(reuters|bbc|cnn|the guardian|sky news|cnbc|fox|nbc|abc|cbs|usatoday)\b.*$/i,"")
-    .replace(/\[[^\]]+\]|\([^)]*\)|\"|\'/g," ")
-    .replace(/\s+/g," ")
-    .trim();
-  return s;
-}
-function normTitle(s){
-  s = cleanTitle(s);
-  s = s.toLowerCase().replace(/[^a-z0-9äöüß ]/gi," ").replace(/\s+/g," ").trim();
-  return s;
-}
-function jaccard(a,b){
-  const A=new Set(normTitle(a).split(" ").filter(Boolean));
-  const B=new Set(normTitle(b).split(" ").filter(Boolean));
-  const inter=[...A].filter(x=>B.has(x)).length;
-  const uni=new Set([...A,...B]).size||1;
-  return inter/uni;
-}
-function groupSimilar(items,th=0.45){
-  const groups=[];
-  for(const it of items){
-    let placed=false;
-    for(const g of groups){
-      if(jaccard(it.title, g[0].title) >= th){ g.push(it); placed=true; break; }
-    }
-    if(!placed) groups.push([it]);
-  }
-  return groups;
-}
-
-/* ---- Konsens-Objekte ---- */
-function buildConsensus(groups,cat){
-  const result=[];
-  for(const g of groups){
-    const seen=new Set(), picked=[];
-    for(const it of g){
-      if(!seen.has(it.host)){ picked.push(it); seen.add(it.host); }
-      if(picked.length>=4) break; // max 4 Quellen/Konsens
-    }
-    const title = picked.slice().sort((a,b)=>b.title.length-a.title.length)[0]?.title || picked[0]?.title || "Artikel";
-    const sentences=[];
-    picked.forEach(p=>{
-      (p.desc||"").split(/(?<=[.!?])\s+/).forEach(s=>{
-        const t=s.trim(); if(t && !sentences.some(x=>jaccard(x,t)>0.8)) sentences.push(t);
-      });
-    });
-    const dek = sentences.join(" ").slice(0,750);
-
-    const ts = picked.map(p=>Date.parse(p.pub)).filter(t=>!Number.isNaN(t));
-    const newest = ts.length ? new Date(Math.max(...ts)) : new Date();
-    const oldest = ts.length ? new Date(Math.min(...ts)) : newest;
-
-    const pub = newest.toISOString();       // Sortierung
-    const firstPub = oldest.toISOString();  // Anzeige
-    const sources = picked.map(p=>({ source:p.host, title:p.title, url:p.link }));
-    const sourceCount = sources.length;
-
-    result.push({ id:Math.random().toString(36).slice(2), title, dek, pub, firstPub, sources, sourceCount, cat });
-  }
-  result.sort((a,b)=>Date.parse(b.pub)-Date.parse(a.pub));
-  return result;
-}
-
-async function clientFetchCategory(cat){
-  const urls=FEEDS[cat]||FEEDS.Top;
-  const all=[];
-  for(const u of urls){
-    const host=(()=>{ try{ return new URL(u).hostname.replace(/^www\\./,''); }catch{ return ""; }})();
-    const xml=await fetchFeed(u);
-    if(!xml) continue;
-    const items=parseFeed(xml,host);
-    all.push(...items);
-  }
-  if(!all.length) return [];
-  let groups = groupSimilar(all, 0.45);
-  const singles = groups.filter(g=>g.length===1).length;
-  if (singles/groups.length > 0.7) groups = groupSimilar(all, 0.40);
-  return buildConsensus(groups, cat);
-}
-
-/* ========= Cache ========= */
-function cacheKey(cat){ return `AIN_cache_${cat}_noimg_firstPub_v2`; }
-function getCached(cat){
-  try{ const raw=sessionStorage.getItem(cacheKey(cat)); if(!raw) return null;
-    const obj=JSON.parse(raw); if(Date.now()-obj.ts > CACHE_TTL_MS) return null; return obj.data||null;
-  }catch{ return null; }
-}
-function setCached(cat,data){ try{ sessionStorage.setItem(cacheKey(cat), JSON.stringify({ts:Date.now(),data})); }catch{} }
-
-/* ========= Formatierung ========= */
+/* ========= Helfer ========= */
 function fmtDate(iso){
   if(!iso) return "";
   const d = new Date(iso);
@@ -437,53 +410,144 @@ function fmtDate(iso){
 function escapeHtml(s){ return (s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function trunc(s,n){ s=s||''; return s.length>n ? s.slice(0,n-1)+'…' : s; }
 
-/* ========= Daten holen ========= */
-async function getArticles(cat){
-  const cached=getCached(cat); if(cached&&cached.length) return cached;
-  let arts=await tryServerArticles(cat);
-  if(arts&&arts.length){ setCached(cat, arts); return arts; }
-  const list=await clientFetchCategory(cat); setCached(cat,list); return list;
+/* ========= Rendering-Helfer ========= */
+function makeHero(a){
+  const media = a.imageHero ? `<div class="media"><img loading="lazy" src="${a.imageHero}" alt="${escapeHtml(a.title)}"></div>` : "";
+  return `
+  <a class="hero fade" href="#/artikel/${a.id}">
+    ${media}
+    <div class="inner">
+      <div class="meta" style="color:#bbb">
+        <span>${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${a.sourceCount|| (a.sources?.length||1)} Quelle${(a.sourceCount|| (a.sources?.length||1))>1?'n':''}</span>
+        <span class="badge beta">BETA</span>
+      </div>
+      <h2>${escapeHtml(a.title)}</h2>
+      <p>${escapeHtml(trunc(a.dek,220))}</p>
+    </div>
+  </a>`;
+}
+function makeCard(a){
+  const media = a.imageCard ? `<div class="media"><img loading="lazy" src="${a.imageCard}" alt="${escapeHtml(a.title)}"></div>` : "";
+  return `
+  <a class="card fade" href="#/artikel/${a.id}">
+    ${media}
+    <div class="inner">
+      <div class="meta">
+        <span>${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${a.sourceCount|| (a.sources?.length||1)} Quelle${(a.sourceCount|| (a.sources?.length||1))>1?'n':''}</span>
+        <span class="badge beta">BETA</span>
+      </div>
+      <h3>${escapeHtml(a.title)}</h3>
+      <p>${escapeHtml(trunc(a.dek,180))}</p>
+    </div>
+  </a>`;
 }
 
-/* ========= Rendering ========= */
-let renderCount=INITIAL_RENDER;
+/* ========= „Mittel“-Zusammenfassung (extraktiv) ========= */
+const STOP_DE = new Set(("der,die,das,und,oder,aber,im,in,an,am,auf,aus,mit,für,ohne,um,zu,beim,vom,von,dem,den,des,ein,eine,einer,einem,eines,ist,sind,war,waren,wird,werden,hat,haben,wurde,auch,nicht,noch,schon,so,wie,als,mehr,weniger,über,unter,zwischen,gegen,nach,vor,seit,bis,bei,man,es,wir,ihr,er,sie,ihn,ihm,uns,eu,ihrer,deren,am,beide,alle,jede,kein,keine,keinen").split(","));
+function tokens(s){
+  return (s||"").toLowerCase()
+    .replace(/[^a-z0-9äöüß ]/gi," ")
+    .split(/\s+/).filter(t=>t && t.length>2 && !STOP_DE.has(t));
+}
+function jaccardWords(a,b){
+  const A=new Set(tokens(a)), B=new Set(tokens(b));
+  const inter=[...A].filter(x=>B.has(x)).length;
+  const uni=new Set([...A,...B]).size||1;
+  return inter/uni;
+}
+function splitSentences(paras){
+  const text = (paras||[]).join(" ").replace(/\s+/g," ").trim();
+  if(!text) return [];
+  return text.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
+}
+function scoreSentence(s, idx, total){
+  const len = s.length;
+  const target=140;
+  const lengthScore = Math.max(0, 1 - Math.abs(len-target)/target);
+  const positionScore = 1 - (idx/(total||1))*0.5;
+  const digitScore = /\d/.test(s) ? 0.12 : 0;
+  const dashScore = /[:–\-]/.test(s) ? 0.06 : 0;
+  return lengthScore*0.6 + positionScore*0.22 + digitScore + dashScore;
+}
+function summarizeMedium(paras, targetChars=900, maxSentences=8, simThreshold=0.6){
+  const sents = splitSentences(paras);
+  const scored = sents.map((s,i)=>({s, i, sc: scoreSentence(s,i,sents.length)}))
+                      .sort((a,b)=>b.sc-a.sc);
+  const chosen=[];
+  let totalLen=0;
+  for(const cand of scored){
+    const redundant = chosen.some(x=>jaccardWords(x.s, cand.s) >= simThreshold);
+    if(redundant) continue;
+    if(totalLen + cand.s.length + 1 > targetChars && chosen.length>=3) continue;
+    chosen.push(cand);
+    totalLen += cand.s.length + 1;
+    if(chosen.length>=maxSentences) break;
+  }
+  chosen.sort((a,b)=>a.i-b.i);
+  const perPara = Math.max(3, Math.ceil(chosen.length/2));
+  const out=[];
+  for(let i=0;i<chosen.length;i+=perPara){
+    out.push(chosen.slice(i,i+perPara).map(x=>x.s).join(" "));
+  }
+  return out;
+}
 
-async function renderCategory(cat,slug){
-  LAST_SLUG=slug||""; localStorage.setItem(LS_LAST_SLUG, LAST_SLUG);
-  setActiveTab(LAST_SLUG);
+/* ========= Text-Ansicht (Filter) ========= */
+function renderArticleBodyHTML(a, mode){
+  const paras = a.bodyParas && a.bodyParas.length ? a.bodyParas : [a.dek||""];
+  if(mode === 'medium'){
+    const mids = summarizeMedium(paras, 900, 8, 0.6);
+    const effective = mids.length ? mids : [paras[0]||""];
+    return `<div class="article-body">${effective.map(p=>`<p>${escapeHtml(p)}</p>`).join("")}</div>`;
+  }
+  if(mode === 'points'){
+    const ptsFull = splitSentences(paras);
+    const picked=[]; 
+    for(const s of ptsFull){
+      let dup=false;
+      for(const p of picked){ if(jaccardWords(p,s)>0.6){ dup=true; break; } }
+      if(!dup) picked.push(s);
+      if(picked.length>=7) break;
+    }
+    return `<div class="article-body"><ul>${picked.map(p=>`<li>${escapeHtml(p)}</li>`).join("")}</ul></div>`;
+  }
+  return `<div class="article-body">${paras.map(p=>`<p>${escapeHtml(p)}</p>`).join("")}</div>`;
+}
+function buildFilterMenu(current){
+  return `
+    <div class="filter-menu" id="filterMenu" role="menu" aria-hidden="true">
+      <button class="filter-item ${current==='long'?'active':''}" data-mode="long" role="menuitem">
+        <span class="dot"></span><span>Lang (Standard)</span>
+      </button>
+      <button class="filter-item ${current==='medium'?'active':''}" data-mode="medium" role="menuitem">
+        <span class="dot"></span><span>Mittel (gekürzt)</span>
+      </button>
+      <button class="filter-item ${current==='points'?'active':''}" data-mode="points" role="menuitem">
+        <span class="dot"></span><span>Keypoints</span>
+      </button>
+    </div>`;
+}
+
+/* ========= Rendering Liste/Artikel ========= */
+let renderCountInitial = 12, renderStep = 12;
+
+function renderList(cat, arts){
   const app=document.getElementById('app');
-  app.innerHTML=`<div id="loading">Lade Artikel…</div>`;
-  badge.textContent="Modus ermitteln…";
-
-  const arts = (await getArticles(cat)).slice().sort((a,b)=>Date.parse(b.pub)-Date.parse(a.pub));
   if(!arts||!arts.length){ app.innerHTML=`<p style="padding:16px;color:#666">Keine Artikel gefunden.</p>`; return; }
-  STORE.byId=Object.fromEntries(arts.map(a=>[a.id,a]));
-  badge.textContent=STORE.mode==="server"?"Server-Modus":"Client-Modus";
 
-  renderCount=INITIAL_RENDER;
+  if (arts.length < MIN_ARTICLES){
+    const padded = arts.slice();
+    while (padded.length < MIN_ARTICLES) padded.push(arts[padded.length % arts.length]);
+    arts = padded;
+  }
+  STORE.byId=Object.fromEntries(arts.map(a=>[a.id,a]));
 
   const top=arts[0];
-  const hero=`
-    <a class="hero" href="#/artikel/${top.id}">
-      <div class="inner">
-        <div class="meta">${fmtDate(top.firstPub || top.pub)} • Aggregiert aus ${top.sourceCount|| (top.sources?.length||1)} Quelle${(top.sourceCount|| (top.sources?.length||1))>1?'n':''}</div>
-        <h2>${escapeHtml(top.title)}</h2>
-        <p>${escapeHtml(trunc(top.dek,220))}</p>
-      </div>
-    </a>`;
-
-  const makeCard=(a)=>`
-    <a class="card" href="#/artikel/${a.id}">
-      <div class="inner">
-        <div class="meta">${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${a.sourceCount|| (a.sources?.length||1)} Quelle${(a.sourceCount|| (a.sources?.length||1))>1?'n':''}</div>
-        <h3>${escapeHtml(a.title)}</h3>
-        <p>${escapeHtml(trunc(a.dek,180))}</p>
-      </div>
-    </a>`;
+  const hero = makeHero(top);
 
   const rest=arts.slice(1);
-  const firstChunk=rest.slice(0,renderCount-1).map(makeCard).join('');
-  const moreLeft=rest.length-(renderCount-1);
+  const firstChunk=rest.slice(0,renderCountInitial-1).map(makeCard).join('');
+  const moreLeft=rest.length-(renderCountInitial-1);
 
   app.innerHTML = `${hero}<div id="grid" class="grid">${firstChunk}</div>${moreLeft>0?`<button id="loadmore" class="btn">Mehr laden (${moreLeft})</button>`:''}`;
 
@@ -491,13 +555,24 @@ async function renderCategory(cat,slug){
   if(btn){
     btn.addEventListener('click',()=>{
       const grid=document.getElementById('grid');
-      const next=rest.slice(renderCount-1,renderCount-1+LOAD_STEP).map(makeCard).join('');
+      const next=rest.slice(renderCountInitial-1,renderCountInitial-1+renderStep).map(makeCard).join('');
       grid.insertAdjacentHTML('beforeend',next);
-      renderCount+=LOAD_STEP;
-      const remaining=rest.length-(renderCount-1);
+      renderCountInitial+=renderStep;
+      const remaining=rest.length-(renderCountInitial-1);
       if(remaining>0) btn.textContent=`Mehr laden (${remaining})`; else btn.remove();
     });
   }
+}
+
+async function renderCategory(cat,slug){
+  LAST_SLUG=slug||""; localStorage.setItem(LS_LAST_SLUG, LAST_SLUG);
+  setActiveTab(LAST_SLUG);
+  const app=document.getElementById('app');
+  app.innerHTML=`<div id="loading">Lade Artikel…</div>`;
+
+  const demoListArr = (DEMO[cat] || DEMO.Top) ?? [];
+  const arts = demoListArr.slice().sort((a,b)=>Date.parse(b.pub)-Date.parse(a.pub));
+  renderList(cat, arts);
 }
 
 function attachBackHandler(){
@@ -514,8 +589,41 @@ function handleBack(e){
   window.addEventListener('hashchange', onHash, {once:true});
 
   if (history.length > 1) history.back();
-  // Fallback, wenn es keinen Verlauf gibt (z.B. direkter Einstieg ins Artikel-Deep-Link)
   setTimeout(()=>{ if(!navigated || location.hash === before){ location.hash = fallback; } }, 200);
+}
+
+function attachFilterHandlers(a){
+  const btn = document.getElementById('filterBtn');
+  const menu = document.getElementById('filterMenu');
+  const bodyWrap = document.getElementById('articleBodyContainer');
+  if(!btn || !menu || !bodyWrap) return;
+
+  bodyWrap.innerHTML = renderArticleBodyHTML(a, TEXT_MODE);
+  const label = document.getElementById('filterCaption');
+  if (label) label.textContent = (TEXT_MODE==='long'?'Lang':TEXT_MODE==='medium'?'Mittel':'Keypoints');
+
+  const closeMenu = ()=>{ menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); btn.setAttribute('aria-expanded','false'); };
+  const openMenu = ()=>{ menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); btn.setAttribute('aria-expanded','true'); };
+
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(menu.classList.contains('open')) closeMenu(); else openMenu();
+  });
+  document.addEventListener('click', (e)=>{ if(!menu.contains(e.target) && e.target!==btn) closeMenu(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
+
+  menu.querySelectorAll('.filter-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const mode = item.getAttribute('data-mode');
+      if(!mode) return;
+      saveTextMode(mode);
+      menu.querySelectorAll('.filter-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      if (label) label.textContent = (mode==='long'?'Lang':mode==='medium'?'Mittel':'Keypoints');
+      bodyWrap.innerHTML = renderArticleBodyHTML(a, TEXT_MODE);
+      closeMenu();
+    });
+  });
 }
 
 async function renderArticle(id){
@@ -523,55 +631,65 @@ async function renderArticle(id){
   const app=document.getElementById('app');
   app.innerHTML=`<div id="loading">Lade Artikel…</div>`;
 
-  const srv=await tryServerArticle(id);
-  if(srv){
-    const cat=srv.cat||'Top';
-    const slugFromCat=CAT_TO_SLUG[cat]||LAST_SLUG||"";
-    LAST_SLUG=slugFromCat; localStorage.setItem(LS_LAST_SLUG, LAST_SLUG); setActiveTab(LAST_SLUG);
-    const sources=(srv.sources||[]).map(s=>`
-      <li>${escapeHtml(s.source)}: <a href="${s.url}" target="_blank" rel="noopener">${escapeHtml(s.title)}</a></li>
-    `).join('');
-    const count = srv.sourceCount || (srv.sources?.length||1);
-    app.innerHTML=`
-      <a class="back" id="backLink" href="#/">← Zurück</a>
-      <section class="article">
-        <div class="meta">Veröffentlicht: ${fmtDate(srv.firstPub || srv.pub)} • Aggregiert aus ${count} Quelle${count>1?'n':''}</div>
-        <h1>${escapeHtml(srv.title)}</h1>
-        <p>${escapeHtml(srv.dek || "")}</p>
-        ${srv.body||''}
-        <div class="sources">
-          <h3>Quellen</h3>
-          <ul>${sources}</ul>
-        </div>
-      </section>`;
-    attachBackHandler();
-    badge.textContent="Server-Modus";
-    return;
+  let a = STORE.byId[id];
+
+  if(!a){
+    let found=null, foundCat='Top';
+    for (const [cat, arr] of Object.entries(DEMO)){
+      found = (arr||[]).find(x=>x.id===id);
+      if(found){ foundCat=cat; break; }
+    }
+    if(found){
+      a = found;
+      LAST_SLUG = CAT_TO_SLUG[foundCat] || "";
+      localStorage.setItem(LS_LAST_SLUG, LAST_SLUG);
+      STORE.byId[id] = a;
+      setActiveTab(LAST_SLUG);
+    }
   }
 
-  const a=STORE.byId[id];
-  const cat=a?.cat||'Top';
-  const slugFromCat=CAT_TO_SLUG[cat]||LAST_SLUG||"";
-  LAST_SLUG=slugFromCat; localStorage.setItem(LS_LAST_SLUG, LAST_SLUG); setActiveTab(LAST_SLUG);
+  if(!a){ app.innerHTML=`<p style="padding:16px;color:#666">Artikel nicht gefunden.</p>`; return; }
 
-  if(!a){ app.innerHTML=`<p style="padding:16px;color:#666">Artikel nicht gefunden.</p>`; badge.textContent="Client-Modus"; return; }
   const sources=(a.sources||[]).map(s=>`
     <li>${escapeHtml(s.source)}: <a href="${s.url}" target="_blank" rel="noopener">${escapeHtml(s.title)}</a></li>
   `).join('');
   const count = a.sourceCount || (a.sources?.length||1);
+
+  const cover = a.image
+    ? `<div class="media"><img loading="lazy" src="${a.image}" alt="${escapeHtml(a.title)}"></div>`
+    : "";
+
+  const metaRow = `
+    <div class="meta-row">
+      <div class="meta-left">
+        <span class="meta">Veröffentlicht: ${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${count} Quelle${count>1?'n':''}</span>
+        <span class="badge beta">BETA</span>
+      </div>
+      <div class="meta-actions">
+        <button class="filter-btn" id="filterBtn" type="button" aria-haspopup="true" aria-expanded="false" title="Textansicht">
+          <span class="icon">📝</span><span>Text</span>
+          <span class="filter-caption" id="filterCaption"> ${TEXT_MODE==='long'?'Lang':TEXT_MODE==='medium'?'Mittel':'Keypoints'}</span>
+          <span class="chev">▾</span>
+        </button>
+        ${buildFilterMenu(TEXT_MODE)}
+      </div>
+    </div>
+  `;
+
   app.innerHTML=`
     <a class="back" id="backLink" href="#/">← Zurück</a>
     <section class="article">
-      <div class="meta">Veröffentlicht: ${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${count} Quelle${count>1?'n':''}</div>
+      ${metaRow}
       <h1>${escapeHtml(a.title)}</h1>
-      <p>${escapeHtml(a.dek || "")}</p>
+      ${cover}
+      <div id="articleBodyContainer"></div>
       <div class="sources">
         <h3>Quellen</h3>
         <ul>${sources}</ul>
       </div>
     </section>`;
   attachBackHandler();
-  badge.textContent="Client-Modus";
+  attachFilterHandlers(a);
 }
 
 /* ========= Router ========= */
@@ -670,6 +788,50 @@ btnSave.addEventListener('click', ()=>{
 document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape' && backdrop.style.display === 'flex') closePersonalize();
 });
+
+/* --- Hotfix: Klick-Verhalten --- */
+(function(){
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a.tab');
+    if (!a) return;
+    if (a.classList.contains('active')) {
+      e.preventDefault();
+      if (typeof route === 'function') route();
+    }
+  });
+  const brand = document.getElementById('brandLink');
+  if (brand) {
+    brand.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if (location.hash === '' || location.hash === '#' || location.hash === '#/') {
+        if (typeof route === 'function') route();
+      } else {
+        location.hash = '#/';
+      }
+    });
+  }
+  window.addEventListener('hashchange', () => {
+    const h = (location.hash||'').replace(/^#/,'');
+    const parts = h.split('/').filter(Boolean);
+    if (parts[0] === 'artikel' && typeof STORE !== 'undefined' && STORE && !STORE.byId[parts[1]]) {
+      if (typeof getRoute === 'function' && typeof renderCategory === 'function') {
+        const slug = (typeof LAST_SLUG !== 'undefined') ? LAST_SLUG : '';
+        const catMap = (typeof SLUG_TO_CAT !== 'undefined') ? SLUG_TO_CAT : {};
+        const cat = catMap[slug] || 'Top';
+        renderCategory(cat, slug);
+      }
+    }
+  });
+  document.addEventListener('click', (e)=>{
+    const a = e.target.closest('a[href^="#/artikel/"]');
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    if (href === (location.hash || '')) {
+      e.preventDefault();
+      if (typeof route === 'function') route();
+    }
+  });
+})();
 </script>
 </body>
 </html>
