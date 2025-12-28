@@ -9,27 +9,44 @@
   :root{--red:#e50914}
   *{box-sizing:border-box}
   body{font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#fff;color:#111}
+
   /* Header */
   header{background:var(--red);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between}
   header h1{margin:0;text-transform:uppercase;font-size:24px;letter-spacing:.5px}
   header em{font-style:italic}
   header a.brand{color:#fff;text-decoration:none;display:inline-flex;align-items:center}
   header a.brand:focus, header a.brand:hover{opacity:.9}
-  /* Nav */
-  nav{display:flex;gap:10px;overflow:auto;padding:10px 16px;border-bottom:1px solid #eee;background:#fff;position:sticky;top:0;z-index:5}
+
+  /* Nav mit Suchleiste */
+  nav{
+    display:flex;align-items:center;gap:10px;
+    overflow:hidden;padding:10px 16px;border-bottom:1px solid #eee;background:#fff;
+    position:sticky;top:0;z-index:5
+  }
+  .tabs-wrap{display:flex;gap:10px;overflow:auto;flex:1}
   .tab{padding:8px 12px;border:none;background:#fff;border-bottom:3px solid transparent;font-weight:700;color:#555;text-decoration:none;white-space:nowrap}
   .tab.active{color:var(--red);border-color:var(--red)}
-  .personalize{margin-left:auto;color:#e50914;background:transparent;border:1px solid #e50914;border-radius:999px;padding:6px 10px;cursor:pointer;font-weight:700}
+  .nav-search{
+    min-width:180px;max-width:240px;width:22ch;
+    padding:8px 10px 8px 30px;border:1px solid #ddd;border-radius:999px;
+    background:#fafafa url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23999" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85h-.017zm-5.242 1.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>') no-repeat 10px 50%;
+    background-size:16px 16px;color:#666;outline:none;
+  }
+  .nav-search:disabled{opacity:1;color:#999;cursor:not-allowed}
+  .personalize{color:#e50914;background:transparent;border:1px solid #e50914;border-radius:999px;padding:6px 10px;cursor:pointer;font-weight:700}
   .personalize:hover{background:#ffecee}
+
   /* Layout */
   main{max-width:1220px;margin:18px auto;padding:0 16px}
   #loading{padding:20px;color:#666}
+
   /* Media */
   .media{position:relative;overflow:hidden;background:#f2f2f2}
   .media img{width:100%;height:100%;object-fit:cover;display:block}
   .hero .media{height:200px}
   .card .media{height:120px}
   .article .media{height:260px;border-radius:8px;overflow:hidden;margin:8px 0 12px}
+
   /* Hero (Text) */
   .hero{display:block;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);text-decoration:none;color:inherit;margin-bottom:16px;background:#111}
   .hero .inner{padding:18px;color:#fff}
@@ -38,33 +55,32 @@
   .meta{font-size:12px;color:#666}
   .badge{font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 6px;border-radius:999px}
   .beta{background:#ffe58a;color:#111}
+
   /* Grid (Text-Karten) */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
   .card{display:block;background:#fff;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 8px 24px rgba(0,0,0,.06)}
   .card .inner{padding:12px}
   .card h3{margin:4px 0 0;font-size:16px;line-height:1.25}
   .card p{margin:8px 0 0;color:#444;font-size:14px}
+
   /* Article page */
   .article{max-width:860px;margin:18px auto;padding:0 16px;position:relative}
   .article h1{font-size:24px;margin:8px 0}
+
   /* Meta-Zeile im Artikel: links Infos, rechts Button */
-  .article .meta-row{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 10px
-  }
+  .article .meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 10px}
   .meta-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .meta-actions{margin-left:auto;position:relative;display:flex;align-items:center}
+
   .article .sources{margin-top:18px;padding:12px;background:#f7f7f7;border-radius:8px}
   .article .sources a{color:#e50914}
   .article-body p{margin:12px 0;line-height:1.6}
-  /* >>> Keypoints bündig links (ohne Einzug) <<< */
-  .article-body ul{
-    margin:10px 0 0 0;      /* kein linker Außenabstand */
-    padding-left:0;         /* kein innerer Einzug */
-    list-style-position:inside; /* Bullet steht in der Content-Kante */
-  }
+  /* Keypoints bündig links */
+  .article-body ul{margin:10px 0 0 0;padding-left:0;list-style-position:inside}
   .article-body li{margin:6px 0;line-height:1.5}
   .back{display:inline-block;margin:12px 16px;color:#e50914;text-decoration:none;font-weight:700;cursor:pointer}
   footer{padding:18px;text-align:center;color:#666}
+
   /* Modal Personalisieren */
   .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100}
   .modal{background:#fff;border-radius:12px;max-width:560px;width:92%;box-shadow:0 25px 80px rgba(0,0,0,.25);overflow:hidden}
@@ -81,22 +97,27 @@
   .fade{animation:fade .25s ease-in}
   @keyframes fade{from{opacity:.5}to{opacity:1}}
 
-  /* Text-Filter-Button */
+  /* Text-Filter-Button – mit neuem Icon */
   .filter-btn{
     display:inline-flex;align-items:center;gap:8px;
-    border:1px solid #e6e6e6;
-    background:linear-gradient(180deg,#ffffff,#f6f6f6);
-    border-radius:12px;padding:8px 12px;font-weight:800;
-    cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.06);
-    letter-spacing:.2px
+    border:1px solid #e6e6e6;background:linear-gradient(180deg,#ffffff,#f6f6f6);
+    border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);letter-spacing:.2px;color:var(--red)
   }
-  .filter-btn .icon{font-size:14px}
   .filter-btn .chev{display:inline-block;transition:transform .18s ease}
   .filter-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
   .filter-caption{font-size:12px;color:#666;margin-left:2px}
+
+  /* CSS-generiertes Filter-Icon (3 Balken) */
+  .ficon{display:inline-block;width:18px;height:14px;position:relative}
+  .ficon em{position:absolute;left:50%;transform:translateX(-50%);height:4px;background:var(--red);border-radius:2px}
+  .ficon em:nth-child(1){top:0;width:18px}
+  .ficon em:nth-child(2){top:5px;width:12px}
+  .ficon em:nth-child(3){top:10px;width:7px}
+
+  /* Dropdown */
   .filter-menu{
-    position:absolute;right:0;top:calc(100% + 8px);z-index:5;
-    background:#fff;border:1px solid #ececec;border-radius:12px;
+    position:absolute;right:0;top:calc(100% + 8px);z-index:5;background:#fff;border:1px solid #ececec;border-radius:12px;
     box-shadow:0 18px 40px rgba(0,0,0,.12);min-width:220px;display:none;overflow:hidden
   }
   .filter-menu.open{display:block}
@@ -188,6 +209,7 @@ let LAST_SLUG = localStorage.getItem(LS_LAST_SLUG) || "";
 const navEl = document.getElementById('nav');
 function renderNav(activeSlug){
   navEl.innerHTML = "";
+
   const visible = getVisibleCats();
   const slugsOnly = visible.map(v=>v.slug||"");
   if (activeSlug != null && slugsOnly.length){
@@ -198,6 +220,9 @@ function renderNav(activeSlug){
       activeSlug = target;
     }
   }
+
+  const tabs = document.createElement('div');
+  tabs.className = 'tabs-wrap';
   visible.forEach(v=>{
     const href = v.slug ? `#/${v.slug}` : "#/";
     const a = document.createElement('a');
@@ -207,14 +232,23 @@ function renderNav(activeSlug){
     const isRoot = href==="#/";
     const match = isRoot ? (!activeSlug || activeSlug==="/" || activeSlug==="") : (v.slug===activeSlug);
     if (match) a.classList.add('active');
-    navEl.appendChild(a);
+    tabs.appendChild(a);
   });
+  navEl.appendChild(tabs);
+
+  const search = document.createElement('input');
+  search.type = 'search';
+  search.className = 'nav-search';
+  search.placeholder = 'Suchen …';
+  search.disabled = true;
+  search.setAttribute('aria-disabled','true');
+  navEl.appendChild(search);
+
   const btn = document.createElement('button');
   btn.id = "btnPersonalize";
   btn.className = "personalize";
   btn.type = "button";
   btn.textContent = "+ Personalisieren";
-  btn.style.marginLeft = "auto";
   btn.addEventListener('click', openPersonalize);
   navEl.appendChild(btn);
 }
@@ -401,10 +435,7 @@ function fmtDate(iso){
   if(!iso) return "";
   const d = new Date(iso);
   try{
-    return new Intl.DateTimeFormat('de-DE',{
-      weekday:'short', day:'2-digit', month:'2-digit', year:'numeric',
-      hour:'2-digit', minute:'2-digit'
-    }).format(d);
+    return new Intl.DateTimeFormat('de-DE',{weekday:'short', day:'2-digit', month:'2-digit', year:'numeric',hour:'2-digit', minute:'2-digit'}).format(d);
   }catch{ return d.toLocaleString('de-DE'); }
 }
 function escapeHtml(s){ return (s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
@@ -442,7 +473,7 @@ function makeCard(a){
   </a>`;
 }
 
-/* ========= „Mittel“-Zusammenfassung (extraktiv) ========= */
+/* ========= Zusammenfassung (mittel) ========= */
 const STOP_DE = new Set(("der,die,das,und,oder,aber,im,in,an,am,auf,aus,mit,für,ohne,um,zu,beim,vom,von,dem,den,des,ein,eine,einer,einem,eines,ist,sind,war,waren,wird,werden,hat,haben,wurde,auch,nicht,noch,schon,so,wie,als,mehr,weniger,über,unter,zwischen,gegen,nach,vor,seit,bis,bei,man,es,wir,ihr,er,sie,ihn,ihm,uns,eu,ihrer,deren,am,beide,alle,jede,kein,keine,keinen").split(","));
 function tokens(s){
   return (s||"").toLowerCase()
@@ -461,8 +492,7 @@ function splitSentences(paras){
   return text.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
 }
 function scoreSentence(s, idx, total){
-  const len = s.length;
-  const target=140;
+  const len = s.length, target=140;
   const lengthScore = Math.max(0, 1 - Math.abs(len-target)/target);
   const positionScore = 1 - (idx/(total||1))*0.5;
   const digitScore = /\d/.test(s) ? 0.12 : 0;
@@ -471,8 +501,7 @@ function scoreSentence(s, idx, total){
 }
 function summarizeMedium(paras, targetChars=900, maxSentences=8, simThreshold=0.6){
   const sents = splitSentences(paras);
-  const scored = sents.map((s,i)=>({s, i, sc: scoreSentence(s,i,sents.length)}))
-                      .sort((a,b)=>b.sc-a.sc);
+  const scored = sents.map((s,i)=>({s, i, sc: scoreSentence(s,i,sents.length)})).sort((a,b)=>b.sc-a.sc);
   const chosen=[];
   let totalLen=0;
   for(const cand of scored){
@@ -667,7 +696,8 @@ async function renderArticle(id){
       </div>
       <div class="meta-actions">
         <button class="filter-btn" id="filterBtn" type="button" aria-haspopup="true" aria-expanded="false" title="Textansicht">
-          <span class="icon">📝</span><span>Text</span>
+          <span class="ficon" aria-hidden="true"><em></em><em></em><em></em></span>
+          <span>Text</span>
           <span class="filter-caption" id="filterCaption"> ${TEXT_MODE==='long'?'Lang':TEXT_MODE==='medium'?'Mittel':'Keypoints'}</span>
           <span class="chev">▾</span>
         </button>
