@@ -48,13 +48,23 @@
   .article .media{height:260px;border-radius:8px;overflow:hidden;margin:8px 0 12px}
 
   /* Hero (Text) */
-  .hero{display:block;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);text-decoration:none;color:inherit;margin-bottom:16px;background:#111}
+  .hero{position:relative;display:block;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);text-decoration:none;color:inherit;margin-bottom:16px;background:#111}
   .hero .inner{padding:18px;color:#fff}
   .hero h2{margin:6px 0 0;font-size:26px}
   .hero p{margin:8px 0 0;color:#f3f3f3}
   .meta{font-size:12px;color:#666}
   .badge{font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 6px;border-radius:999px}
   .beta{background:#ffe58a;color:#111}
+
+  /* LIVE-Badge auf dem Hero */
+  .live-badge{
+    position:absolute;top:10px;left:10px;z-index:2;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.45);
+    color:#fff;font-weight:800;font-size:12px;letter-spacing:.3px
+  }
+  .live-dot{width:10px;height:10px;border-radius:50%;background:var(--red);opacity:.25;animation:liveblink .9s ease-in-out infinite alternate}
+  @keyframes liveblink{from{opacity:.25}to{opacity:1}}
 
   /* Grid (Text-Karten) */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
@@ -67,7 +77,7 @@
   .article{max-width:860px;margin:18px auto;padding:0 16px;position:relative}
   .article h1{font-size:24px;margin:8px 0}
 
-  /* Meta-Zeile im Artikel: links Infos, rechts Button */
+  /* Meta-Zeile im Artikel */
   .article .meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 10px}
   .meta-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .meta-actions{margin-left:auto;position:relative;display:flex;align-items:center}
@@ -75,7 +85,6 @@
   .article .sources{margin-top:18px;padding:12px;background:#f7f7f7;border-radius:8px}
   .article .sources a{color:#e50914}
   .article-body p{margin:12px 0;line-height:1.6}
-  /* Keypoints bündig links */
   .article-body ul{margin:10px 0 0 0;padding-left:0;list-style-position:inside}
   .article-body li{margin:6px 0;line-height:1.5}
   .back{display:inline-block;margin:12px 16px;color:#e50914;text-decoration:none;font-weight:700;cursor:pointer}
@@ -97,7 +106,7 @@
   .fade{animation:fade .25s ease-in}
   @keyframes fade{from{opacity:.5}to{opacity:1}}
 
-  /* Text-Filter-Button – mit neuem Icon */
+  /* Text-Filter-Button */
   .filter-btn{
     display:inline-flex;align-items:center;gap:8px;
     border:1px solid #e6e6e6;background:linear-gradient(180deg,#ffffff,#f6f6f6);
@@ -108,7 +117,7 @@
   .filter-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
   .filter-caption{font-size:12px;color:#666;margin-left:2px}
 
-  /* CSS-generiertes Filter-Icon (3 Balken) */
+  /* CSS Filter-Icon */
   .ficon{display:inline-block;width:18px;height:14px;position:relative}
   .ficon em{position:absolute;left:50%;transform:translateX(-50%);height:4px;background:var(--red);border-radius:2px}
   .ficon em:nth-child(1){top:0;width:18px}
@@ -125,6 +134,28 @@
   .filter-item:hover{background:#f9f9f9}
   .filter-item .dot{width:10px;height:10px;border-radius:999px;background:#d0d0d0}
   .filter-item.active .dot{background:var(--red)}
+
+  /* Teilen */
+  .share-section{margin-top:14px}
+  .share-section h3{margin:0 0 8px 0}
+  .share-buttons{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .sbtn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+        box-shadow:0 6px 18px rgba(0,0,0,.08);border:1px solid rgba(255,255,255,.3);cursor:pointer}
+  .sbtn.sys{background:linear-gradient(180deg,#ffffff,#f6f6f6)}
+  .sbtn.mail{background:linear-gradient(180deg,#ffffff,#f6f6f6)}
+  .sbtn.insta{border-radius:50%;background:conic-gradient(from 200deg,#f58529,#dd2a7b,#8134af,#515bd4,#f58529)}
+  .sbtn.x{border-radius:50%;background:#000;color:#fff;font-weight:900}
+  .sbtn.fb{border-radius:50%;background:#3b5998;color:#fff}
+  .sbtn.tiktok{border-radius:50%;background:#000;color:#fff;position:relative}
+  .sbtn .glyph{font-weight:900}
+  .sbtn svg{width:20px;height:20px;display:block}
+  .sbtn.tiktok .dual{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;
+                     filter:drop-shadow(1px 1px 0 #f52d55) drop-shadow(-1px -1px 0 #00f7e9)}
+
+  /* Toast */
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;
+         padding:8px 12px;border-radius:999px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .18s}
+  .toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -164,6 +195,8 @@
   </div>
 </div>
 
+<div id="toast" class="toast" role="status" aria-live="polite">Link kopiert</div>
+
 <script>
 /* ========= Flags ========= */
 const DEMO_ONLY = true;
@@ -187,7 +220,7 @@ const DEFAULT_VISIBLE = ALL_CATS.map(c=>c.slug||"");
 
 const LS_VISIBLE_KEY = "AIN_visible_slugs_v2";
 const LS_LAST_SLUG   = "AIN_last_slug_v2";
-const LS_TEXT_MODE   = "AIN_text_mode_v2"; // 'long' | 'medium' | 'points'
+const LS_TEXT_MODE   = "AIN_text_mode_v2";
 let TEXT_MODE = localStorage.getItem(LS_TEXT_MODE) || 'long';
 if (TEXT_MODE === 'short') TEXT_MODE = 'medium';
 function saveTextMode(mode){ TEXT_MODE = mode; localStorage.setItem(LS_TEXT_MODE, mode); }
@@ -430,7 +463,7 @@ const DEMO = {
   Wissenschaft: demoList("Wissenschaft")
 };
 
-/* ========= Helfer ========= */
+/* ========= Helpers ========= */
 function fmtDate(iso){
   if(!iso) return "";
   const d = new Date(iso);
@@ -440,6 +473,12 @@ function fmtDate(iso){
 }
 function escapeHtml(s){ return (s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function trunc(s,n){ s=s||''; return s.length>n ? s.slice(0,n-1)+'…' : s; }
+function showToast(text="Link kopiert"){
+  const t=document.getElementById('toast'); if(!t) return;
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1100);
+}
 
 /* ========= Rendering-Helfer ========= */
 function makeHero(a){
@@ -447,6 +486,7 @@ function makeHero(a){
   return `
   <a class="hero fade" href="#/artikel/${a.id}">
     ${media}
+    <div class="live-badge" aria-hidden="true"><span class="live-dot"></span><span>LIVE</span></div>
     <div class="inner">
       <div class="meta" style="color:#bbb">
         <span>${fmtDate(a.firstPub || a.pub)} • Aggregiert aus ${a.sourceCount|| (a.sources?.length||1)} Quelle${(a.sourceCount|| (a.sources?.length||1))>1?'n':''}</span>
@@ -555,6 +595,79 @@ function buildFilterMenu(current){
         <span class="dot"></span><span>Keypoints</span>
       </button>
     </div>`;
+}
+
+/* ========= Teilen ========= */
+function buildShareSection(a){
+  const src = (a.sources && a.sources[0] && a.sources[0].url) ? a.sources[0].url : (location.origin + location.pathname + location.hash);
+  const title = a.title || "AI NEWS";
+  return `
+    <div class="share-section">
+      <h3>Teilen</h3>
+      <div class="share-buttons">
+        <button id="btnShareSys" class="sbtn sys" title="Teilen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" />
+            <path d="M12 3v14" />
+            <path d="M7 8l5-5 5 5" />
+          </svg>
+        </button>
+        <a id="btnShareMail" class="sbtn mail" title="Mail" href="mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(src)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 4h16v16H4z" />
+            <path d="M22 6l-10 7L2 6" />
+          </svg>
+        </a>
+        <button id="btnShareIG" class="sbtn insta" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 7h8a1 1 0 011 1v8a1 1 0 01-1 1H8a1 1 0 01-1-1V8a1 1 0 011-1zm7.5-2.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM12 9.5A2.5 2.5 0 109.5 12 2.5 2.5 0 0012 9.5z"/></svg>
+        </button>
+        <a id="btnShareX" class="sbtn x" title="X" target="_blank" rel="noopener"
+           href="https://x.com/intent/tweet?text=${encodeURIComponent(title+' – '+src)}"><span class="glyph">X</span></a>
+        <a id="btnShareFB" class="sbtn fb" title="Facebook" target="_blank" rel="noopener"
+           href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(src)}"><span class="glyph">f</span></a>
+        <button id="btnShareTT" class="sbtn tiktok" title="TikTok"><span class="dual">♪</span><span style="opacity:0">♪</span></button>
+        <button id="btnCopyLink" class="sbtn sys" title="Link kopieren">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11 4" />
+            <path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07L13 20" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+function attachShareHandlers(a){
+  const shareUrl = (a.sources && a.sources[0] && a.sources[0].url) ? a.sources[0].url : (location.origin + location.pathname + location.hash);
+  const shareText = `${a.title} – ${shareUrl}`;
+
+  const sys = document.getElementById('btnShareSys');
+  if (sys){
+    sys.addEventListener('click', async ()=>{
+      if (navigator.share){
+        try{ await navigator.share({title:a.title, text:a.title, url:shareUrl}); }catch{}
+      } else {
+        try{ await navigator.clipboard.writeText(shareText); showToast(); }catch{}
+      }
+    });
+  }
+  const ig = document.getElementById('btnShareIG');
+  if (ig){
+    ig.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(shareText); showToast(); }catch{}
+    });
+  }
+  const tt = document.getElementById('btnShareTT');
+  if (tt){
+    tt.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(shareText); showToast(); }catch{}
+    });
+  }
+  const copy = document.getElementById('btnCopyLink');
+  if (copy){
+    copy.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(shareUrl); showToast(); }catch{}
+    });
+  }
 }
 
 /* ========= Rendering Liste/Artikel ========= */
@@ -717,9 +830,11 @@ async function renderArticle(id){
         <h3>Quellen</h3>
         <ul>${sources}</ul>
       </div>
+      ${buildShareSection(a)}
     </section>`;
   attachBackHandler();
   attachFilterHandlers(a);
+  attachShareHandlers(a);
 }
 
 /* ========= Router ========= */
@@ -767,10 +882,7 @@ function openPersonalize(){
   backdrop.style.display = "flex";
   backdrop.setAttribute('aria-hidden','false');
 }
-function closePersonalize(){
-  backdrop.style.display = "none";
-  backdrop.setAttribute('aria-hidden','true');
-}
+function closePersonalize(){ backdrop.style.display = "none"; backdrop.setAttribute('aria-hidden','true'); }
 function getModalSelection(){
   const boxes = catsList.querySelectorAll('input[type=checkbox]');
   const sel = [];
@@ -781,9 +893,7 @@ btnCloseModal.addEventListener('click', closePersonalize);
 btnCancel.addEventListener('click', closePersonalize);
 backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) closePersonalize(); });
 
-btnSelectAll.addEventListener('click', ()=>{
-  catsList.querySelectorAll('input[type=checkbox]').forEach(b=>b.checked=true);
-});
+btnSelectAll.addEventListener('click', ()=>{ catsList.querySelectorAll('input[type=checkbox]').forEach(b=>b.checked=true); });
 btnSelectDefault.addEventListener('click', ()=>{
   const def = new Set(DEFAULT_VISIBLE);
   catsList.querySelectorAll('input[type=checkbox]').forEach(b=>{
@@ -801,10 +911,7 @@ btnReset.addEventListener('click', ()=>{
 });
 btnSave.addEventListener('click', ()=>{
   const sel = getModalSelection();
-  if (!sel.length){
-    alert("Mindestens eine Kategorie muss aktiviert bleiben.");
-    return;
-  }
+  if (!sel.length){ alert("Mindestens eine Kategorie muss aktiviert bleiben."); return; }
   saveVisibleSlugs(sel);
   const current = getRoute();
   const activeSlug = current.name==="article" ? LAST_SLUG : (current.slug||"");
